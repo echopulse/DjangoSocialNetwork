@@ -1,0 +1,55 @@
+{% extends "social/base.html" %}
+
+{% load staticfiles%}
+
+{% block content %}
+<script src="{% static 'social/jquery-1.11.2.js' %}"></script>
+<div class='main'>
+<h2>{{ greeting }} Inbox</h2>
+<br/>
+{% if public_messages %}
+	<h3>Public Messages</h3>
+	<ul>
+	{% for message in public_messages %}
+		<li>
+		    {{ message.time }} from {{ message.sender }} 
+		    <br/>  
+		    {{ message.message }} 
+		    {% if canDelete %} 
+		        [<a href="?remove={{ message.id }}">delete</a>] 
+		        [<a href="?reply={{ message.sender }}">reply</a>]
+	        {% endif %}
+		</li>
+		<br/>
+	{% endfor %}
+	</ul>
+	<br/>
+{% endif %}
+{% if private_messages %}
+	<h3>Private Messages</h3>
+	<ul>
+	{% for message in private_messages %}
+		<li> 
+		    {{ message.time }} from {{ message.sender }} 
+		    <br/>  
+		    {{ message.message }}
+		    {% if canDelete %} 
+		        [<a href="?remove={{ message.id }}">delete</a>] 
+		        [<a href="?reply={{ message.sender }}">reply</a>]
+		    {% endif %}
+	    </li>
+	{% endfor %}
+	</ul>
+	<br/>
+{% endif %}
+
+
+<form method='POST' action='/social/messages/{{ viewName }}' enctype='multipart/form-data'>
+   	{% csrf_token %}
+	<h3>Post a Message</h3>
+	<textarea name='text' cols='50' rows='3'>{{ text }}</textarea><br>
+	<input type="checkbox" name="is_private" value="false"> Private
+	<input type='submit' value='Send'>
+</form>
+</div>
+{% endblock %}
