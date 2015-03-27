@@ -1,10 +1,19 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext, loader
-#from rest_framework import viewsets
-#from social.serializers import MessageSerializer
+from rest_framework import viewsets
+from social.serializers import MessageSerializer, MemberSerializer
 
 from social.models import Member, Profile, Message
+
+class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.order_by('id')
+    serializer_class = MessageSerializer    
+    
+class MemberViewSet(viewsets.ModelViewSet):
+    queryset = Member.objects.order_by('username')
+    serializer_class = MemberSerializer    
+
 
 appname = 'Facemagazine'
 
@@ -309,9 +318,6 @@ def checkuser(request):
         if member is not None:
             return HttpResponse("<span class='taken'>&nbsp;&#x2718; This username is taken</span>")
         else:
-            return HttpResponse("<span class='available'>&nbsp;&#x2714; This username is available</span>")
-            
-            
-            
+            return HttpResponse("<span class='available'>&nbsp;&#x2714; This username is available</span>")           
             
             
