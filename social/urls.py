@@ -1,7 +1,11 @@
 from django.conf.urls import patterns, url, include
 from social import views
-from social.models import Message
-#from rest_framework import obtain_auth_token
+
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register(r'messages', views.MessageViewSet)
+router.register(r'members', views.MemberViewSet)
 
 urlpatterns = patterns('',
     # main page
@@ -25,5 +29,5 @@ urlpatterns = patterns('',
     # messages page
     url(r'^messages/(?P<view_user>\w+)$', views.messages),
     #API link
-    #url(r'^api/token/', obtain_auth_token, name='api-token'),
+    url(r'^api/', include(router.urls)),
 )
