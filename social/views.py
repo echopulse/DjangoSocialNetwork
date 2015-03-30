@@ -3,16 +3,29 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext, loader
 from rest_framework import viewsets
 from social.serializers import MessageSerializer, MemberSerializer
-
+from social.renderers import CollectionJsonRenderer
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from django.http import JsonResponse
 from social.models import Member, Profile, Message
 
+from django.views.decorators.csrf import csrf_exempt
+
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.order_by('id')
+    #renderer_classes = (CollectionJsonRenderer, )
+    queryset = Message.objects.all() #order_by('id')
     serializer_class = MessageSerializer    
     
 class MemberViewSet(viewsets.ModelViewSet):
-    queryset = Member.objects.order_by('username')
-    serializer_class = MemberSerializer    
+    #renderer_classes = (CollectionJsonRenderer, )
+    queryset = Member.objects.all() #order_by('username')
+    serializer_class = MemberSerializer
+    
+class JSONResponse(HttpResponse):
+    def __init__(self, data, **kwargs):
+        content = JSONRenderer().render(data)
+        kwargs['content_type'] = 'application/json'
+        super(JSONResponse, self).__init__(content, **kwargs)    
 
 
 appname = 'Facemagazine'
@@ -23,6 +36,7 @@ def index(request):
             'appname': appname,
         })
     return HttpResponse(template.render(context))
+
 
 def messages(request, view_user):
     if 'username' in request.session:
