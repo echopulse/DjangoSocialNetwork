@@ -1,32 +1,42 @@
 from django.shortcuts import render
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext, loader
 from rest_framework import viewsets
 from social.serializers import MessageSerializer, MemberSerializer
 from social.renderers import CollectionJsonRenderer
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from django.http import JsonResponse
 from social.models import Member, Profile, Message
+from collection_json import Collection, Data, Error, Item, Link, Query, Template
+from rest_framework.response import Response
 
-from django.views.decorators.csrf import csrf_exempt
 
 class MessageViewSet(viewsets.ModelViewSet):
-    #renderer_classes = (CollectionJsonRenderer, )
-    queryset = Message.objects.all() #order_by('id')
-    serializer_class = MessageSerializer    
+    renderer_classes = (CollectionJsonRenderer, )
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    def get(self, request):
+        return Response(reference_collection())
     
 class MemberViewSet(viewsets.ModelViewSet):
-    #renderer_classes = (CollectionJsonRenderer, )
-    queryset = Member.objects.all() #order_by('username')
+    renderer_classes = (CollectionJsonRenderer, )
+    queryset = Member.objects.all()
     serializer_class = MemberSerializer
-    
-class JSONResponse(HttpResponse):
-    def __init__(self, data, **kwargs):
-        content = JSONRenderer().render(data)
-        kwargs['content_type'] = 'application/json'
-        super(JSONResponse, self).__init__(content, **kwargs)    
+    def get(self, request):
+        return Response(reference_collection())
 
+def reference_collection():
+    link = Link("href_link", "rel_link")
+    data = Data("data1", "value1")
+    item = Item(href="href_item", data=[data], links=[link])
+    error = Error(code=1, message="error text")
+    query = Query("href_query", "rel", data=[data])
+    template = Template(data=[data])
+    collection = Collection(href="href_collection",
+                            links=[link],
+                            items=[item],
+                            queries=[query],
+                            template=template,
+                            error=error)
+    return collection
 
 appname = 'Facemagazine'
 
@@ -51,7 +61,7 @@ def messages(request, view_user):
             canDelete = True;
             public_messages = Message.objects.filter(receiver=username).filter(is_private=False)
             private_messages = Message.objects.filter(receiver=username).filter(is_private=True)
-        #Looking at public messages sent to other user along with private messages you sent the other user
+        #Looking at public messages sent to other user along with private messages you authored sent the other user
         else:
             canDelete = False;
             greeting = view_user + "'s"
