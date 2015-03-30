@@ -30,4 +30,6 @@ urlpatterns = patterns('',
     url(r'^messages/(?P<view_user>\w+)$', views.messages),
     #API link
     url(r'^api/', include(router.urls)),
+    #url(r'^api/(?P<message_id>\w+)$', views.api)
+    
 )
